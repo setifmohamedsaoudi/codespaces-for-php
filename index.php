@@ -2,83 +2,75 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>صفحة البداية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة الدخول</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            direction: rtl;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
         }
-        .login-container {
-            width: 300px;
-            background-color: white;
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 100px auto;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
         }
         .hospital-info {
-            flex-grow: 1;
-            margin-left: 20px;
+            margin-top: 30px;
+            font-size: 18px;
+            color: #555;
         }
-        h1 {
-            color: #4CAF50;
-            text-align: center;
+        .footer {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #aaa;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
+        .button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
         }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-        footer {
-            text-align: center;
-            margin-top: 20px;
+        .button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1>تسجيل الدخول</h1>
-        <form method="POST" action="login.php">
-            <label for="username">اسم المستخدم:</label>
-            <input type="text" id="username" name="username" required>
-            
-            <label for="password">كلمة المرور:</label>
-            <input type="password" id="password" name="password" required>
-            
-            <input type="submit" value="تسجيل الدخول">
-        </form>
-    </div>
+
+<div class="container">
+    <h1>مرحبا بك في صفحة الدخول</h1>
+    <form action="login.php" method="POST">
+        <label for="username">اسم المستخدم:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">كلمة المرور:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="دخول">
+    </form>
+
     <div class="hospital-info">
-        <h1>المؤسسة الإستشفائية العمومية عين الكبيرة</h1>
-        <p>EPH Ain El Kebira</p>
-        <p>مؤسسة إستشفائية عمومية</p>
-        <p>Etablissement Public Hospitalier EPH</p>
-        <p>العنوان: عين الكبيرة - سطيف</p>
-        <p>بنك الدم مستشفى عين الكبيرة يرحب بكم جزاكم الله خيرا</p>
+        <p>معلومات المستشفى:</p>
+        <p>اسم المستشفى: [اسم المستشفى]</p>
+        <p>العنوان: [عنوان المستشفى]</p>
+        <p>الهاتف: [رقم هاتف المستشفى]</p>
     </div>
-    <footer>
-        <p>جميع الحقوق محفوظة لأطباء مستشفى عين الكبيرة ©</p>
-    </footer>
+
+    <a href="visitors.php" class="button">ابحث عن المتبرعين</a>
+
+    <div class="footer">
+        <p>&copy; 2024 جميع الحقوق محفوظة لأطباء مستشفى عين الكبيرة.</p>
+    </div>
+</div>
+
 </body>
 </html>
