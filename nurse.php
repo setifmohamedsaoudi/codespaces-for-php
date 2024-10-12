@@ -66,4 +66,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
                     <td><?php echo $searchResult['surname']; ?></td>
                     <td><?php echo $searchResult['birth_date']; ?></td>
                     <td><?php echo $searchResult['blood_type']; ?></td>
-                    <td><?php echo $
+                    <td><?php echo $searchResult['rh_factor']; ?></td>
+                </tr>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p>لا توجد نتائج للبحث.</p>
+    <?php endif; ?>
+</body>
+</html>
