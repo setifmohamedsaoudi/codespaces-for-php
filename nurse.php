@@ -1,6 +1,14 @@
 <?php
 // nurse.php
+session_start();
 
+// التحقق من تسجيل الدخول وصلاحية الدور
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'nurse') {
+    header("Location: login.php");
+    exit();
+}
+
+// مسارات ملفات JSON
 $donorsFile = 'donors.json';
 
 // وظيفة لتحميل البيانات من ملف JSON
@@ -21,6 +29,7 @@ function saveData($file, $data) {
 $search_results = [];
 $update_message = "";
 
+// معالجة النموذج
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['search'])) {
         $first_name = trim($_POST['first_name']);
@@ -82,10 +91,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; }
+        .logout { text-align: right; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logout">
+            <p>مرحبًا، <?php echo htmlspecialchars($_SESSION['username']); ?>! <a href="logout.php">تسجيل الخروج</a></p>
+        </div>
+        
         <h2>قسم الممرض</h2>
         
         <?php if ($update_message): ?>
