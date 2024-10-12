@@ -1,3 +1,4 @@
+https://super-duper-space-lhttps://super-duper-space-lamp-v6qq9jwvwjx9hxw4-8000.app.github.dev/query.phpamp-v6qq9jwvwjx9hxw4-8000.app.github.dev/query.php
 <?php
 // index.php
 ?>
