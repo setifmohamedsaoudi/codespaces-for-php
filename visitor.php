@@ -1,42 +1,59 @@
 <?php
-// visitor.php
+session_start();
 
-// مسارات ملفات JSON
-$donorsFile = 'donors.json';
-$requestsFile = 'requests.json';
+$donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
+$searchResults = [];
 
-// وظيفة لتحميل البيانات من ملف JSON
-function loadData($file) {
-    if (!file_exists($file)) {
-        file_put_contents($file, json_encode([]));
-    }
-    $json = file_get_contents($file);
-    return json_decode($json, true);
-}
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['blood_type'])) {
+    $bloodType = $_GET['blood_type'];
 
-// وظيفة لحفظ البيانات في ملف JSON
-function saveData($file, $data) {
-    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    file_put_contents($file, $json);
-}
-
-$search_results = [];
-$action_message = "";
-
-if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
-    $blood_type = $_GET['search'];
-    
-    if ($blood_type) {
-        $donors = loadData($donorsFile);
-        foreach ($donors as $donor) {
-            if ($donor['blood_type'] === $blood_type) {
-                $search_results[] = $donor;
-            }
+    foreach ($donors as $donor) {
+        if ($donor['blood_type'] === $bloodType) {
+            $searchResults[] = $donor;
         }
     }
 }
+?>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>نتائج البحث عن المتبرعين</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; background-color: #f2f2f2; }
+        h1 { color: #4CAF50; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>نتائج البحث عن المتبرعين</h1>
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['request_phone'])) {
-    $donor_id = $_POST['donor_id'];
-    $visitor_name = trim($_POST['visitor_name']);
-    $visitor_contact = trim($_POST['visitor_contact⬤
+    <?php if (!empty($searchResults)): ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>اللقب</th>
+                    <th>تاريخ الميلاد</th>
+                    <th>الزمرة الدموية</th>
+                    <th>زمرة الريزوس</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($searchResults as $donor): ?>
+                    <tr>
+                        <td><?php echo $donor['name']; ?></td>
+                        <td><?php echo $donor['surname']; ?></td>
+                        <td><?php echo $donor['birth_date']; ?></td>
+                        <td><?php echo $donor['blood_type']; ?></td>
+                        <td><?php echo $donor['rh_factor']; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p>لا توجد نتائج للبحث.</p>
+    <?php endif; ?>
+</body>
+</html>
