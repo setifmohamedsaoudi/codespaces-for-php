@@ -5,18 +5,34 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'nurse') {
     exit();
 }
 
+// استرجاع المتبرعين من الجلسة
 $donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
 $searchResult = null;
+$updateSuccess = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
-    $searchName = $_POST['name'];
-    $searchSurname = $_POST['surname'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['search_donor'])) {
+        // البحث عن متبرع
+        $searchName = $_POST['name'];
+        $searchSurname = $_POST['surname'];
 
-    foreach ($donors as $donor) {
-        if ($donor['name'] === $searchName && $donor['surname'] === $searchSurname) {
-            $searchResult = $donor;
-            break;
+        foreach ($donors as $donor) {
+            if ($donor['name'] === $searchName && $donor['surname'] === $searchSurname) {
+                $searchResult = $donor;
+                break;
+            }
         }
+    } elseif (isset($_POST['update_donation_date'])) {
+        // تحديث تاريخ آخر تبرع
+        $donationDate = $_POST['donation_date'];
+        foreach ($donors as &$donor) {
+            if ($donor['name'] === $_POST['name'] && $donor['surname'] === $_POST['surname']) {
+                $donor['last_donation_date'] = $donationDate;
+                $updateSuccess = true;
+                break;
+            }
+        }
+        $_SESSION['donors'] = $donors; // تحديث الجلسة
     }
 }
 ?>
@@ -58,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
                     <th>تاريخ الميلاد</th>
                     <th>الزمرة الدموية</th>
                     <th>زمرة الريزوس</th>
+                    <th>تاريخ آخر تبرع</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,9 +84,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
                     <td><?php echo $searchResult['birth_date']; ?></td>
                     <td><?php echo $searchResult['blood_type']; ?></td>
                     <td><?php echo $searchResult['rh_factor']; ?></td>
+                    <td><?php echo isset($searchResult['last_donation_date']) ? $searchResult['last_donation_date'] : 'غير محدد'; ?></td>
                 </tr>
             </tbody>
         </table>
+        
+        <h3>تحديث تاريخ آخر تبرع</h3>
+        <form method="POST">
+            <input type="hidden" name="name" value="<?php echo $searchResult['name']; ?>">
+            <input type="hidden" name="surname" value="<?php echo $searchResult['surname']; ?>">
+            <label for="donation_date">تاريخ آخر تبرع:</label>
+            <input type="date" name="donation_date" required>
+            <input type="submit" name="update_donation_date" value="تحديث">
+        </form>
+
+        <?php if ($updateSuccess): ?>
+            <p style="color: green;">تم تحديث تاريخ آخر تبرع بنجاح!</p>
+        <?php endif; ?>
     <?php else: ?>
         <p>لا توجد نتائج للبحث.</p>
     <?php endif; ?>
