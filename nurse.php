@@ -78,20 +78,86 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>قسم الممرض</title>
     <style>
-        body { font-family: Arial, sans-serif; direction: rtl; }
-        .container { width: 60%; margin: auto; }
-        .message { padding: 10px; margin-bottom: 20px; }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        form { border: 1px solid #ccc; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-        label { display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; }
-        input[type="submit"] { width: auto; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-        input[type="submit"]:hover { background-color: #45a049; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-        .logout { text-align: right; margin-bottom: 20px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            direction: rtl; 
+            background-color: #f2f2f2; 
+            margin: 0; 
+            padding: 0;
+        }
+        .container { 
+            width: 80%; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background-color: #fff; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        .logout {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        h2 { text-align: center; }
+        .message { 
+            padding: 10px; 
+            margin-bottom: 20px; 
+            border-radius: 5px;
+        }
+        .success { 
+            background-color: #d4edda; 
+            color: #155724; 
+        }
+        .error { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+        }
+        form { 
+            border: 1px solid #ccc; 
+            padding: 20px; 
+            border-radius: 5px; 
+            margin-bottom: 20px;
+        }
+        label { 
+            display: block; 
+            margin-top: 10px; 
+        }
+        input, select { 
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 5px; 
+            box-sizing: border-box;
+        }
+        input[type="submit"] { 
+            width: auto; 
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        input[type="submit"]:hover { 
+            background-color: #45a049; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 8px; 
+            text-align: center; 
+        }
+        th { 
+            background-color: #f2f2f2; 
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -118,7 +184,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <label for="last_name">اللقب:</label>
             <input type="text" id="last_name" name="last_name" required>
             
-            <br>
             <input type="submit" value="بحث">
         </form>
         
@@ -145,7 +210,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <td>
                             <form action="nurse.php" method="post">
                                 <input type="hidden" name="update" value="1">
-                                <input type="hidden" name="donor_id" value="<?php echo $donor['id']; ?>">
+                                <input type="hidden" name="donor_id" value="<?php echo htmlspecialchars($donor['id']); ?>">
                                 <input type="date" name="last_donation_date" required>
                                 <input type="submit" value="تحديث">
                             </form>
