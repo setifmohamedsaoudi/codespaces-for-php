@@ -5,7 +5,6 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'nurse') {
     exit();
 }
 
-// استرجاع المتبرعين من الجلسة
 $donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
 $searchResult = null;
 $updateSuccess = false;
@@ -80,30 +79,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </thead>
             <tbody>
                 <tr>
-                    <td><?php echo $searchResult['name']; ?></td>
-                    <td><?php echo $searchResult['surname']; ?></td>
-                    <td><?php echo $searchResult['birth_date']; ?></td>
-                    <td><?php echo $searchResult['blood_type']; ?></td>
-                    <td><?php echo $searchResult['rh_factor']; ?></td>
-                    <td><?php echo isset($searchResult['last_donation_date']) ? $searchResult['last_donation_date'] : 'غير محدد'; ?></td>
+                    <td><?php echo htmlspecialchars($searchResult['name']); ?></td>
+                    <td><?php echo htmlspecialchars($searchResult['surname']); ?></td>
+                    <td><?php echo htmlspecialchars($searchResult['birth_date']); ?></td>
+                    <td><?php echo htmlspecialchars($searchResult['blood_type']); ?></td>
+                    <td><?php echo htmlspecialchars($searchResult['rh_factor']); ?></td>
+                    <td><?php echo htmlspecialchars($searchResult['last_donation_date'] ?? 'غير محدد'); ?></td>
                 </tr>
             </tbody>
         </table>
         
         <h3>تحديث تاريخ آخر تبرع</h3>
         <form method="POST">
-            <input type="hidden" name="name" value="<?php echo $searchResult['name']; ?>">
-            <input type="hidden" name="surname" value="<?php echo $searchResult['surname']; ?>">
-            <label for="donation_date">تاريخ آخر تبرع:</label>
-            <input type="date" name="donation_date" required>
-            <input type="submit" name="update_donation_date" value="تحديث">
-        </form>
-
-        <?php if ($updateSuccess): ?>
-            <p style="color: green;">تم تحديث تاريخ آخر تبرع بنجاح!</p>
-        <?php endif; ?>
-    <?php else: ?>
-        <p>لا توجد نتائج للبحث.</p>
-    <?php endif; ?>
-</body>
-</html>
+            <input type="hidden" name="name" value="<?php echo htmlspecialchars($searchResult['name']); ?>">
+            <input type="hidden" name="surname" value="<?php echo htmlspecialchars($searchResult['surname']); ?>">
+            <label for="donation_date">تاريخ
