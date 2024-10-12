@@ -1,83 +1,173 @@
 <?php
-// تحميل بيانات المتبرعين من ملف
+// visitors.php
+
+$donorsFile = 'donors.txt';
+$adminEmail = 'admin@example.com'; // قم بتغيير هذا إلى بريد الإدارة الفعلي
+
+// تحميل قائمة المتبرعين
 $donors = [];
-if (file_exists('donors.txt')) {
-    $donorsData = file_get_contents('donors.txt');
-    $donors = json_decode($donorsData, true) ?? [];
-}
-
-$searchResults = [];
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
-    $bloodType = trim($_POST['blood_type']);
-    $rhFactor = trim($_POST['rh_factor']);
-
-    // البحث عن المتبرعين حسب الزمرة الدموية وزمرة الريزوس
-    foreach ($donors as $donor) {
-        if ($donor['blood_type'] === $bloodType && $donor['rh_factor'] === $rhFactor) {
-            $searchResults[] = $donor;
+if (file_exists($donorsFile)) {
+    $lines = file($donorsFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $donor = json_decode($line, true);
+        if ($donor) {
+            $donors[] = $donor;
         }
     }
 }
+
+// معالجة طلب رقم الهاتف
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_phone'])) {
+    $donorEmail = htmlspecialchars(trim($_POST['donor_email']));
+    $visitorPhone = htmlspecialchars(trim($_POST['visitor_phone']));
+
+    // التحقق من صحة البيانات
+    if (!empty($donorEmail) && !empty($visitorPhone)) {
+        // البحث عن المتبرع بواسطة البريد الإلكتروني
+        $donor = null;
+        foreach ($donors as $d) {
+            if ($d['email'] === $donorEmail) {
+                $donor = $d;
+                break;
+            }
+        }
+
+        if ($donor) {
+            // إرسال إشعار إلى الإدارة
+            $subject = "طلب رقم هاتف المتبرع";
+            $message = "قام الزائر بطلب رقم هاتف المتبرع:\n\n" .
+                       "اسم المتبرع: " . $donor['name'] . "\n" .
+                       "بريد المتبرع: " . $donor['email'] . "\n\n" .
+                       "رقم هاتف الزائر: " . $visitorPhone . "\n\n" .
+                       "يرجى التواصل مع الزائر لتزويده برقم هاتف المتبرع.";
+            $headers = "From: no-reply@yourwebsite.com"; // قم بتغيير عنوان البريد حسب الحاجة
+
+            // استخدام دالة mail لإرسال البريد (تأكد من إعداد الخادم للبريد)
+            if (mail($adminEmail, $subject, $message, $headers)) {
+                $successMessage = "تم إرسال طلبك بنجاح وسيتم التواصل معك قريبًا.";
+            } else {
+                $errorMessage = "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.";
+            }
+        } else {
+            $errorMessage = "لم يتم العثور على المتبرع المحدد.";
+        }
+    } else {
+        $errorMessage = "يرجى ملء جميع الحقول.";
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>صفحة الزوار</title>
+    <title>زوار الموقع</title>
     <style>
-        body { font-family: Arial, sans-serif; direction: rtl; background-color: #f2f2f2; }
-        h1 { color: #4CAF50; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef;
+            padding: 20px;
+        }
+        .donor-list {
+            max-width: 800px;
+            margin: auto;
+        }
+        .donor {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 7px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .request-form {
+            display: none;
+            margin-top: 10px;
+        }
+        .request-form input[type="tel"] {
+            width: 80%;
+            padding: 6px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .request-form input[type="submit"] {
+            padding: 6px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .request-form input[type="submit"]:hover {
+            background-color: #218838;
+        }
+        .message {
+            text-align: center;
+            margin-bottom: 20px;
+            color: green;
+        }
+        .error {
+            color: red;
+        }
     </style>
+    <script>
+        function toggleRequestForm(id) {
+            var form = document.getElementById('request-form-' + id);
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+    </script>
 </head>
 <body>
-    <h1>بحث عن المتبرعين</h1>
-    <form method="POST">
-        <label for="blood_type">الزمرة الدموية:</label>
-        <select name="blood_type" id="blood_type" required>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="AB">AB</option>
-            <option value="O">O</option>
-        </select>
 
-        <label for="rh_factor">زمرة الريزوس:</label>
-        <select name="rh_factor" id="rh_factor" required>
-            <option value="+">موجب</option>
-            <option value="-">سالب</option>
-        </select>
+<div class="donor-list">
+    <h2>قائمة المتبرعين</h2>
 
-        <input type="submit" name="search_donor" value="بحث">
-    </form>
-
-    <?php if (!empty($searchResults)): ?>
-        <h2>نتائج البحث:</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>اللقب</th>
-                    <th>الزمرة الدموية</th>
-                    <th>زمرة الريزوس</th>
-                    <th>تاريخ آخر تبرع</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($searchResults as $donor): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($donor['name']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['surname']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['rh_factor']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['last_donation_date'] ?? 'غير محدد'); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php else: ?>
-        <p>لا توجد نتائج مطابقة.</p>
+    <?php if (isset($successMessage)): ?>
+        <p class="message"><?php echo $successMessage; ?></p>
     <?php endif; ?>
+
+    <?php if (isset($errorMessage)): ?>
+        <p class="message error"><?php echo $errorMessage; ?></p>
+    <?php endif; ?>
+
+    <?php if (count($donors) > 0): ?>
+        <?php foreach ($donors as $index => $donor): ?>
+            <div class="donor">
+                <p><strong>الاسم:</strong> <?php echo htmlspecialchars($donor['name']); ?></p>
+                <p><strong>البريد الإلكتروني:</strong> <?php echo htmlspecialchars($donor['email']); ?></p>
+                <p><strong>العنوان:</strong> <?php echo htmlspecialchars($donor['address']); ?></p>
+             !   <!-- لا نعرض رقم الهاتف إلا عند الطلب -->
+                <button class="button" onclick="toggleRequestForm(<?php echo $index; ?>)">طلب رقم الهاتف</button>
+
+                <div class="request-form" id="request-form-<?php echo $index; ?>">
+                    <form action="visitors.php" method="POST">
+                        <input type="hidden" name="donor_email" value="<?php echo htmlspecialchars($donor['email']); ?>">
+                        <input type="tel" name="visitor_phone" placeholder="أدخل رقم هاتفك" required>
+                        <input type="submit" name="request_phone" value="إرسال الطلب">
+                    </form>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>لا يوجد متبرعين متاحين حاليًا.</p>
+    <?php endif; ?>
+</div>
+
 </body>
 </html>
