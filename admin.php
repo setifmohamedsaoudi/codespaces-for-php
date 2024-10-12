@@ -1,15 +1,12 @@
 <?php
 session_start();
-// التحقق مما إذا كان المستخدم قد سجل الدخول كأدمن
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php?role=admin");
+    header("Location: login.php");
     exit();
 }
 
-// إعداد مصفوفة للمتبرعين (بدون قاعدة بيانات)
 $donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
 
-// إضافة متبرع جديد
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_donor'])) {
     $donor = [
         'name' => $_POST['name'],
