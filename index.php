@@ -1,70 +1,84 @@
-<?php
-session_start();
-
-// تحميل بيانات المتبرعين من ملف
-$donors = [];
-if (file_exists('donors.txt')) {
-    $donorsData = file_get_contents('donors.txt');
-    $donors = json_decode($donorsData, true) ?? [];
-}
-?>
 <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>الصفحة الرئيسية</title>
+    <title>صفحة البداية</title>
     <style>
-        body { font-family: Arial, sans-serif; direction: rtl; background-color: #f2f2f2; }
-        h1 { color: #4CAF50; }
-        a { text-decoration: none; color: #fff; background-color: #4CAF50; padding: 10px; border-radius: 5px; }
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .login-container {
+            width: 300px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        .hospital-info {
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>المؤسسة الإستشفائية العمومية عين الكبيرة</h1>
-    <h2>EPH Ain El Kebira</h2>
-    <h3>مؤسسة إستشفائية عمومية</h3>
-    <h4>Etablissement Public Hospitalier EPH</h4>
-    <p>العنوان: عين الكبيرة - سطيف</p>
-    <p>بنك الدم مستشفى عين الكبيرة يرحب بكم جزاكم الله خيرا.</p>
-
-    <h2>تسجيل الدخول</h2>
-    <form action="login.php" method="post">
-        <input type="text" name="username" placeholder="اسم المستخدم" required>
-        <input type="password" name="password" placeholder="كلمة السر" required>
-        <input type="submit" value="دخول">
-    </form>
-
-    <h2>قائمة المتبرعين</h2>
-    <?php if (empty($donors)): ?>
-        <p>لا توجد متبرعين مسجلين.</p>
-    <?php else: ?>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>اللقب</th>
-                    <th>تاريخ الميلاد</th>
-                    <th>الزمرة الدموية</th>
-                    <th>زمرة الريزوس</th>
-                    <th>تاريخ آخر تبرع</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($donors as $donor): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($donor['name']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['surname']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['birth_date']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['rh_factor']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['last_donation_date'] ?? 'غير محدد'); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-
-    <h2>زيارة صفحة الزوار</h2>
-    <p><a href="visitors.php">إضغط هنا لزيارة صفحة الزوار</a></p>
+    <div class="login-container">
+        <h1>تسجيل الدخول</h1>
+        <form method="POST" action="login.php">
+            <label for="username">اسم المستخدم:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password">كلمة المرور:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <input type="submit" value="تسجيل الدخول">
+        </form>
+    </div>
+    <div class="hospital-info">
+        <h1>المؤسسة الإستشفائية العمومية عين الكبيرة</h1>
+        <p>EPH Ain El Kebira</p>
+        <p>مؤسسة إستشفائية عمومية</p>
+        <p>Etablissement Public Hospitalier EPH</p>
+        <p>العنوان: عين الكبيرة - سطيف</p>
+        <p>بنك الدم مستشفى عين الكبيرة يرحب بكم جزاكم الله خيرا</p>
+    </div>
+    <footer>
+        <p>جميع الحقوق محفوظة لأطباء مستشفى عين الكبيرة ©</p>
+    </footer>
 </body>
 </html>
