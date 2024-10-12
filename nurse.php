@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         $_SESSION['donors'] = $donors; // تحديث الجلسة
+        file_put_contents('donors.txt', json_encode($_SESSION['donors'])); // حفظ البيانات في الملف
     }
 }
 ?>
