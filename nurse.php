@@ -1,16 +1,13 @@
 <?php
 session_start();
-// التحقق مما إذا كان المستخدم قد سجل الدخول كممرض
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'nurse') {
-    header("Location: login.php?role=nurse");
+    header("Location: login.php");
     exit();
 }
 
-// إعداد مصفوفة للمتبرعين (بدون قاعدة بيانات)
 $donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
-
-// البحث عن متبرع
 $searchResult = null;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
     $searchName = $_POST['name'];
     $searchSurname = $_POST['surname'];
@@ -69,12 +66,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
                     <td><?php echo $searchResult['surname']; ?></td>
                     <td><?php echo $searchResult['birth_date']; ?></td>
                     <td><?php echo $searchResult['blood_type']; ?></td>
-                    <td><?php echo $searchResult['rh_factor']; ?></td>
-                </tr>
-            </tbody>
-        </table>
-    <?php elseif ($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
-        <p>لا توجد نتائج للبحث.</p>
-    <?php endif; ?>
-</body>
-</html>
+                    <td><?php echo $
