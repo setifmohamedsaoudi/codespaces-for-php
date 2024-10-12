@@ -5,17 +5,33 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'doctor') {
     exit();
 }
 
-// استرجاع بيانات المتبرعين من الجلسة
-$donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
+// تحميل بيانات المتبرعين من ملف
+$donors = [];
+if (file_exists('donors.txt')) {
+    $donorsData = file_get_contents('donors.txt');
+    $donors = json_decode($donorsData, true) ?? [];
+}
+
 $searchResults = [];
+$currentDate = new DateTime();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
-    $bloodType = $_POST['blood_type'];
+    $name = trim($_POST['name']);
+    $surname = trim($_POST['surname']);
 
-    // البحث عن المتبرعين بناءً على زمرة الدم
+    // البحث عن المتبرع بالاسم واللقب
     foreach ($donors as $donor) {
-        if ($donor['blood_type'] === $bloodType) {
-            $searchResults[] = $donor;
+        if (strcasecmp($donor['name'], $name) === 0 && strcasecmp($donor['surname'], $surname) === 0) {
+            // حساب الفرق بين تاريخ آخر تبرع وتاريخ اليوم
+            if (isset($donor['last_donation_date'])) {
+                $lastDonationDate = new DateTime($donor['last_donation_date']);
+                $interval = $currentDate->diff($lastDonationDate);
+                
+                // إضافة المتبرع إلى النتائج إذا كانت مدة التبرع أكثر من 3 أشهر
+                if ($interval->m > 3 || ($interval->m == 3 && $interval->d > 0)) {
+                    $searchResults[] = $donor;
+                }
+            }
         }
     }
 }
@@ -37,15 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
     <h1>مرحبًا بك، <?php echo $_SESSION['username']; ?> (الطبيب)</h1>
     <p><a href="logout.php">تسجيل الخروج</a></p>
 
-    <h2>بحث عن متبرع حسب زمرة الدم</h2>
+    <h2>بحث عن متبرع</h2>
     <form method="POST">
-        <select name="blood_type" required>
-            <option value="">اختر زمرة الدم</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="AB">AB</option>
-            <option value="O">O</option>
-        </select>
+        <input type="text" name="name" placeholder="الاسم" required>
+        <input type="text" name="surname" placeholder="اللقب" required>
         <input type="submit" name="search_donor" value="بحث">
     </form>
 
