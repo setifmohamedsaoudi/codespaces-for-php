@@ -1,0 +1,153 @@
+/* styles.css */
+
+/* إعدادات أساسية */
+body {
+    font-family: Arial, sans-serif;
+    direction: rtl;
+    text-align: right;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+form {
+    margin-top: 20px;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    color: #555;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.message {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+/* تحسين الجداول على الشاشات الصغيرة */
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    label, input, select, input[type="submit"] {
+        font-size: 14px;
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    table {
+        border: none;
+    }
+
+    tr {
+        margin-bottom: 15px;
+    }
+
+    th, td {
+        border: none;
+        padding: 10px;
+        text-align: right;
+        position: relative;
+    }
+
+    th::before, td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    th:nth-of-type(1)::before { content: "الاسم"; }
+    th:nth-of-type(2)::before { content: "اللقب"; }
+    th:nth-of-type(3)::before { content: "تاريخ الميلاد"; }
+    th:nth-of-type(4)::before { content: "الولاية"; }
+    th:nth-of-type(5)::before { content: "العمر"; }
+
+    td:nth-of-type(1)::before { content: "الاسم"; }
+    td:nth-of-type(2)::before { content: "اللقب"; }
+    td:nth-of-type(3)::before { content: "تاريخ الميلاد"; }
+    td:nth-of-type(4)::before { content: "الولاية"; }
+    td:nth-of-type(5)::before { content: "العمر"; }
+}
