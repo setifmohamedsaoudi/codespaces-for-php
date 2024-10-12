@@ -1,8 +1,6 @@
 <?php
-// logout.php
 session_start();
-session_unset();
-session_destroy();
-header("Location: login.php");
+session_destroy(); // تدمير الجلسة
+header("Location: index.php"); // إعادة توجيه المستخدم إلى الصفحة الرئيسية
 exit();
 ?>
