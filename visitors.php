@@ -7,6 +7,20 @@ if (file_exists('donors.txt')) {
     $donorsData = file_get_contents('donors.txt');
     $donors = json_decode($donorsData, true) ?? [];
 }
+
+$searchResults = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search'])) {
+    $bloodType = $_POST['blood_type'];
+    $rhFactor = $_POST['rh_factor'];
+
+    // البحث عن المتبرعين حسب الزمرة الدموية وزمرة الريزوس
+    foreach ($donors as $donor) {
+        if ($donor['blood_type'] === $bloodType && $donor['rh_factor'] === $rhFactor) {
+            $searchResults[] = $donor;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ar">
@@ -21,12 +35,29 @@ if (file_exists('donors.txt')) {
     </style>
 </head>
 <body>
-    <h1>مرحبًا بك في صفحة الزوار</h1>
-    <h2>قائمة المتبرعين</h2>
-    
-    <?php if (empty($donors)): ?>
-        <p>لا توجد متبرعين مسجلين.</p>
-    <?php else: ?>
+    <h1>صفحة الزوار</h1>
+
+    <h2>البحث عن متبرع</h2>
+    <form method="POST">
+        <label for="blood_type">الزمرة الدموية:</label>
+        <select name="blood_type" required>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="AB">AB</option>
+            <option value="O">O</option>
+        </select>
+
+        <label for="rh_factor">زمرة الريزوس:</label>
+        <select name="rh_factor" required>
+            <option value="موجب">موجب</option>
+            <option value="سالب">سالب</option>
+        </select>
+
+        <input type="submit" name="search" value="بحث">
+    </form>
+
+    <?php if (!empty($searchResults)): ?>
+        <h3>نتائج البحث:</h3>
         <table>
             <thead>
                 <tr>
@@ -34,23 +65,4 @@ if (file_exists('donors.txt')) {
                     <th>اللقب</th>
                     <th>تاريخ الميلاد</th>
                     <th>الزمرة الدموية</th>
-                    <th>زمرة الريزوس</th>
-                    <th>تاريخ آخر تبرع</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($donors as $donor): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($donor['name']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['surname']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['birth_date']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['rh_factor']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['last_donation_date'] ?? 'غير محدد'); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    <?php endif; ?>
-</body>
-</html>
+                    <th>زمرة الريزوس</⬤
