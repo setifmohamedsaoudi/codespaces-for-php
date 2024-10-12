@@ -1,107 +1,116 @@
 <?php
-session_start();
+// admin.php
 
-// تأكد من أن الجلسة تحتوي على قائمة المتبرعين
-if (!isset($_SESSION['donors'])) {
-    if (file_exists('donors.txt')) {
-        $donorsData = file_get_contents('donors.txt');
-        $donors = json_decode($donorsData, true);
-        $_SESSION['donors'] = $donors ? $donors : [];
+// مسار ملف المتبرعين
+$donorsFile = 'donors.txt';
+
+// التحقق من إرسال النموذج
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // الحصول على البيانات من النموذج مع حماية من هجمات XSS
+    $name = htmlspecialchars(trim($_POST['name']));
+    $email = htmlspecialchars(trim($_POST['email']));
+    $phone = htmlspecialchars(trim($_POST['phone']));
+    $address = htmlspecialchars(trim($_POST['address']));
+
+    // التحقق من صحة البيانات
+    if (!empty($name) && !empty($email) && !empty($phone) && !empty($address)) {
+        // تنسيق البيانات لتخزينها (يمكن استخدام CSV أو JSON)
+        $donorData = [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'address' => $address
+        ];
+
+        // تحويل البيانات إلى صيغة JSON
+        $donorJson = json_encode($donorData) . PHP_EOL;
+
+        // حفظ البيانات في الملف
+        file_put_contents($donorsFile, $donorJson, FILE_APPEND | LOCK_EX);
+
+        $successMessage = "تمت إضافة المتبرع بنجاح!";
     } else {
-        $_SESSION['donors'] = [];
+        $errorMessage = "يرجى ملء جميع الحقول.";
     }
 }
-
-// إضافة متبرع جديد
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_donor'])) {
-    $name = $_POST['name'];
-    $surname = $_POST['surname'];
-    $birthDate = $_POST['birth_date'];
-    $bloodType = $_POST['blood_type'];
-    $rhFactor = $_POST['rh_factor'];
-
-    $newDonor = [
-        'name' => $name,
-        'surname' => $surname,
-        'birth_date' => $birthDate,
-        'blood_type' => $bloodType,
-        'rh_factor' => $rhFactor,
-        'last_donation_date' => null
-    ];
-
-    $_SESSION['donors'][] = $newDonor;
-
-    // حفظ البيانات في ملف
-    file_put_contents('donors.txt', json_encode($_SESSION['donors']));
-
-    // إعادة التوجيه لتجنب إعادة إرسال البيانات
-    header("Location: admin.php");
-    exit();
-}
 ?>
+
 <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>صفحة الإدارة</title>
+    <title>لوحة إدارة المتبرعين</title>
     <style>
-        body { font-family: Arial, sans-serif; direction: rtl; background-color: #f2f2f2; }
-        h1 { color: #4CAF50; }
-        a { text-decoration: none; color: #fff; background-color: #4CAF50; padding: 10px; border-radius: 5px; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef;
+            padding: 20px;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0 12px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+        .message {
+            text-align: center;
+            margin-bottom: 20px;
+            color: green;
+        }
+        .error {
+            color: red;
+        }
     </style>
 </head>
 <body>
-    <h1>مرحبًا بك، <?php echo $_SESSION['username']; ?> (الإداري)</h1>
-    <p><a href="logout.php">تسجيل الخروج</a></p>
 
-    <h2>إضافة متبرع</h2>
-    <form method="POST">
-        <input type="text" name="name" placeholder="الاسم" required>
-        <input type="text" name="surname" placeholder="اللقب" required>
-        <input type="date" name="birth_date" placeholder="تاريخ الميلاد" required>
-        <select name="blood_type" required>
-            <option value="">اختر الزمرة الدموية</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="AB">AB</option>
-            <option value="O">O</option>
-        </select>
-        <select name="rh_factor" required>
-            <option value="">اختر زمرة الريزوس</option>
-            <option value="+">موجب</option>
-            <option value="-">سالب</option>
-        </select>
-        <input type="submit" name="add_donor" value="إضافة">
-    </form>
+<div class="form-container">
+    <h2>إضافة متبرع جديد</h2>
 
-    <h2>قائمة المتبرعين</h2>
-    <?php if (empty($_SESSION['donors'])): ?>
-        <p>لا توجد متبرعين مسجلين بعد.</p>
-    <?php else: ?>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>اللقب</th>
-                    <th>تاريخ الميلاد</th>
-                    <th>الزمرة الدموية</th>
-                    <th>زمرة الريزوس</th>
-                    <th>تاريخ آخر تبرع</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($_SESSION['donors'] as $donor): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($donor['name']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['surname']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['birth_date']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['rh_factor']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['last_donation_date'] ?? 'غير محدد'); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+    <?php if (isset($successMessage)): ?>
+        <p class="message"><?php echo $successMessage; ?></p>
     <?php endif; ?>
+
+    <?php if (isset($errorMessage)): ?>
+        <p class="message error"><?php echo $errorMessage; ?></p>
+    <?php endif; ?>
+
+    <form action="admin.php" method="POST">
+        <label for="name">اسم المتبرع:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">البريد الإلكتروني:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="phone">رقم الهاتف:</label>
+        <input type="tel" id="phone" name="phone" required>
+
+        <label for="address">العنوان:</label>
+        <input type="text" id="address" name="address" required>
+
+        <button type="submit" class="button">إضافة المتبرع</button>
+    </form>
+</div>
+
 </body>
 </html>
