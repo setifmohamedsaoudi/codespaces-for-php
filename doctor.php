@@ -1,7 +1,14 @@
-
 <?php
 // doctor.php
+session_start();
 
+// التحقق من تسجيل الدخول وصلاحية الدور
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'doctor') {
+    header("Location: login.php");
+    exit();
+}
+
+// مسارات ملفات JSON
 $donorsFile = 'donors.json';
 
 // وظيفة لتحميل البيانات من ملف JSON
@@ -46,10 +53,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; }
+        .logout { text-align: right; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logout">
+            <p>مرحبًا، <?php echo htmlspecialchars($_SESSION['username']); ?>! <a href="logout.php">تسجيل الخروج</a></p>
+        </div>
+        
         <h2>قسم الطبيب</h2>
         
         <!-- نموذج البحث -->
@@ -76,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <th>اللقب</th>
                     <th>تاريخ الميلاد</th>
                     <th>زومة الريزوس</th>
-                    <th>تاريخ آخر تبرع</th>
+                    <th>مدة آخر تبرع</th>
                 </tr>
                 <?php foreach ($search_results as $donor): ?>
                     <tr>
