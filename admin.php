@@ -1,169 +1,160 @@
 <?php
 // admin.php
-session_start();
 
-// التحقق من تسجيل الدخول
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: login.php");
-    exit;
-}
+// مسارات ملفات JSON
+$donorsFile = 'donors.json';
+$requestsFile = 'requests.json';
 
-// تعريف مسار ملف JSON
-define('USER_FILE', 'users.json');
-
-// قائمة الولايات الجزائرية
-$states = [
-    "01" => "أدرار",
-    "02" => "الشلف",
-    "03" => "الأغواط",
-    "04" => "أم البواقي",
-    "05" => "باتنة",
-    "06" => "بجاية",
-    "07" => "بسكرة",
-    "08" => "بشار",
-    "09" => "البليدة",
-    "10" => "البويرة",
-    "11" => "تمنراست",
-    "12" => "تبسة",
-    "13" => "تلمسان",
-    "14" => "تيارت",
-    "15" => "تيزي وزو",
-    "16" => "الجزائر العاصمة",
-    "17" => "الجلفة",
-    "18" => "جيجل",
-    "19" => "سطيف",
-    "20" => "سعيدة",
-    "21" => "سكيكدة",
-    "22" => "سيدي بلعباس",
-    "23" => "عنابة",
-    "24" => "قالمة",
-    "25" => "قسنطينة",
-    "26" => "المدية",
-    "27" => "مستغانم",
-    "28" => "المسيلة",
-    "29" => "معسكر",
-    "30" => "ورقلة",
-    "31" => "وهران",
-    "32" => "البيض",
-    "33" => "إليزي",
-    "34" => "برج بوعريريج",
-    "35" => "بومرداس",
-    "36" => "الطارف",
-    "37" => "تندوف",
-    "38" => "تيسمسيلت",
-    "39" => "الوادي",
-    "40" => "خنشلة",
-    "41" => "سوق أهراس",
-    "42" => "تيبازة",
-    "43" => "ميلة",
-    "44" => "عين الدفلى",
-    "45" => "النعامة",
-    "46" => "عين تموشنت",
-    "47" => "غرداية",
-    "48" => "غليزان",
-    "49" => "تيميمون",
-    "50" => "برج باجي مختار",
-    "51" => "أولاد جلال",
-    "52" => "بني عباس",
-    "53" => "عين صالح",
-    "54" => "عين قزام",
-    "55" => "تقرت",
-    "56" => "جانت",
-    "57" => "المغير",
-    "58" => "المنيعة"
-];
-
-// دالة لقراءة البيانات من ملف JSON
-function readUsers() {
-    if (!file_exists(USER_FILE)) {
-        return [];
+// وظيفة لتحميل البيانات من ملف JSON
+function loadData($file) {
+    if (!file_exists($file)) {
+        file_put_contents($file, json_encode([]));
     }
-    $json = file_get_contents(USER_FILE);
-    $data = json_decode($json, true);
-    return $data ? $data : [];
+    $json = file_get_contents($file);
+    return json_decode($json, true);
 }
 
-// دالة لكتابة البيانات إلى ملف JSON
-function writeUsers($users) {
-    $json = json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    file_put_contents(USER_FILE, $json);
+// وظيفة لحفظ البيانات في ملف JSON
+function saveData($file, $data) {
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    file_put_contents($file, $json);
 }
 
 $success_message = "";
 $error_message = "";
 
-// معالجة إدخال المستخدم
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_user'])) {
-    // جمع البيانات المدخلة
+// معالجة نموذج الإدخال
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_donor'])) {
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);
     $date_of_birth = $_POST['date_of_birth'];
-    $state_id = $_POST['state'];
+    $blood_type = $_POST['blood_type'];
+    $rh_factor = $_POST['rh_factor'];
 
-    // التحقق من صحة البيانات
-    if (empty($first_name) || empty($last_name) || empty($date_of_birth) || empty($state_id)) {
-        $error_message = "يرجى ملء جميع الحقول.";
-    } elseif (!array_key_exists($state_id, $states)) {
-        $error_message = "الولاية المختارة غير صحيحة.";
-    } else {
-        // قراءة البيانات الحالية
-        $users = readUsers();
-
-        // إضافة المستخدم الجديد
-        $users[] = [
+    if ($first_name && $last_name && $date_of_birth && $blood_type && $rh_factor) {
+        $donors = loadData($donorsFile);
+        $newDonor = [
+            'id' => uniqid(),
             'first_name' => $first_name,
             'last_name' => $last_name,
             'date_of_birth' => $date_of_birth,
-            'state_id' => $state_id
+            'blood_type' => $blood_type,
+            'rh_factor' => $rh_factor,
+            'last_donation_date' => null
         ];
-
-        // كتابة البيانات المحدثة
-        writeUsers($users);
-
-        $success_message = "تم إضافة المستخدم بنجاح.";
+        $donors[] = $newDonor;
+        saveData($donorsFile, $donors);
+        $success_message = "تمت إضافة المتبرع بنجاح!";
+    } else {
+        $error_message = "يرجى ملء جميع الحقول.";
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- وسم viewport -->
-    <title>لوحة تحكم الإدمن</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>إدارة المتبرعين بالدم</title>
+    <style>
+        body { font-family: Arial, sans-serif; direction: rtl; }
+        .container { width: 60%; margin: auto; }
+        .message { padding: 10px; margin-bottom: 20px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        form { border: 1px solid #ccc; padding: 20px; border-radius: 5px; }
+        label { display: block; margin-top: 10px; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; }
+        input[type="submit"] { width: auto; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        input[type="submit"]:hover { background-color: #45a049; }
+        .requests { margin-top: 40px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h2>لوحة تحكم الإدمن</h2>
-        <p style="text-align: left;"><a href="logout.php" style="color: #f44336; text-decoration: none;">تسجيل الخروج</a></p>
+        <h2>الرجاء إدخال المعلومات الخاصة بالمترشحين</h2>
+        
         <?php if ($success_message): ?>
-            <div class="message success"><?php echo htmlspecialchars($success_message); ?></div>
+            <div class="message success"><?php echo $success_message; ?></div>
         <?php endif; ?>
+        
         <?php if ($error_message): ?>
-            <div class="message error"><?php echo htmlspecialchars($error_message); ?></div>
+            <div class="message error"><?php echo $error_message; ?></div>
         <?php endif; ?>
-        <form method="post" action="">
+        
+        <form action="admin.php" method="post">
+            <input type="hidden" name="add_donor" value="1">
+            
             <label for="first_name">الاسم:</label>
             <input type="text" id="first_name" name="first_name" required>
-
+            
             <label for="last_name">اللقب:</label>
             <input type="text" id="last_name" name="last_name" required>
-
+            
             <label for="date_of_birth">تاريخ الميلاد:</label>
             <input type="date" id="date_of_birth" name="date_of_birth" required>
-
-            <label for="state">الولاية:</label>
-            <select id="state" name="state" required>
-                <option value="">اختر الولاية</option>
-                <?php
-                    foreach ($states as $id => $name) {
-                        echo "<option value=\"$id\">$name</option>";
-                    }
-                ?>
+            
+            <label for="blood_type">الزَّمَة الدموية:</label>
+            <select id="blood_type" name="blood_type" required>
+                <option value="">اختر الزَّمَة</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="AB">AB</option>
+                <option value="O">O</option>
             </select>
-
-            <input type="submit" name="submit_user" value="إضافة المستخدم">
+            
+            <label for="rh_factor">زَّمَة الريزوس:</label>
+            <select id="rh_factor" name="rh_factor" required>
+                <option value="">اختر الريزوس</option>
+                <option value="Positive">موجب</option>
+                <option value="Negative">سالب</option>
+            </select>
+            
+            <br>
+            <input type="submit" value="إرسال">
         </form>
+        
+        <div class="requests">
+            <h3>طلبات الزوار لطلب رقم الهاتف</h3>
+            <?php
+                $requests = loadData($requestsFile);
+                if (count($requests) > 0):
+            ?>
+            <table>
+                <tr>
+                    <th>اسم المتبرع</th>
+                    <th>اسم الزائر</th>
+                    <th>رقم اتصال الزائر</th>
+                    <th>تاريخ الطلب</th>
+                    <th>الحالة</th>
+                </tr>
+                <?php foreach ($requests as $request): ?>
+                    <?php
+                        // إيجاد المتبرع
+                        $donors = loadData($donorsFile);
+                        $donor = null;
+                        foreach ($donors as $d) {
+                            if ($d['id'] == $request['donor_id']) {
+                                $donor = $d;
+                                break;
+                            }
+                        }
+                    ?>
+                    <tr>
+                        <td><?php echo $donor ? $donor['first_name'] . ' ' . $donor['last_name'] : 'غير معروف'; ?></td>
+                        <td><?php echo htmlspecialchars($request['visitor_name']); ?></td>
+                        <td><?php echo htmlspecialchars($request['visitor_contact']); ?></td>
+                        <td><?php echo $request['request_date']; ?></td>
+                        <td><?php echo $request['status']; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+            <?php else: ?>
+                <p>لا توجد طلبات حالياً.</p>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 </html>
