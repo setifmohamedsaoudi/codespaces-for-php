@@ -43,17 +43,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>قسم الطبيب</title>
     <style>
-        body { font-family: Arial, sans-serif; direction: rtl; }
-        .container { width: 60%; margin: auto; }
-        form { border: 1px solid #ccc; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-        label { display: block; margin-top: 10px; }
-        select { width: 100%; padding: 8px; margin-top: 5px; }
-        input[type="submit"] { width: auto; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 10px; }
-        input[type="submit"]:hover { background-color: #45a049; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-        .logout { text-align: right; margin-bottom: 20px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            direction: rtl; 
+            background-color: #f2f2f2; 
+            margin: 0; 
+            padding: 0;
+        }
+        .container { 
+            width: 80%; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background-color: #fff; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        .logout {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        h2 { text-align: center; }
+        form { 
+            border: 1px solid #ccc; 
+            padding: 20px; 
+            border-radius: 5px; 
+            margin-bottom: 20px;
+        }
+        label { 
+            display: block; 
+            margin-top: 10px; 
+        }
+        select { 
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 5px; 
+            box-sizing: border-box;
+        }
+        input[type="submit"] { 
+            width: auto; 
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        input[type="submit"]:hover { 
+            background-color: #45a049; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 8px; 
+            text-align: center; 
+        }
+        th { 
+            background-color: #f2f2f2; 
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+        }
     </style>
 </head>
 <body>
