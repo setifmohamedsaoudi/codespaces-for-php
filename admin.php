@@ -1,48 +1,60 @@
 <?php
 session_start();
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
-    exit();
+
+// تحميل بيانات المتبرعين من ملف
+if (!isset($_SESSION['donors'])) {
+    if (file_exists('donors.txt')) {
+        $donorsData = file_get_contents('donors.txt');
+        $donors = json_decode($donorsData, true);
+        $_SESSION['donors'] = $donors ? $donors : [];
+    } else {
+        $_SESSION['donors'] = [];
+    }
 }
 
-$donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
-
+// إضافة متبرع جديد
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_donor'])) {
-    $donor = [
-        'name' => $_POST['name'],
-        'surname' => $_POST['surname'],
-        'birth_date' => $_POST['birth_date'],
-        'blood_type' => $_POST['blood_type'],
-        'rh_factor' => $_POST['rh_factor'],
-        'last_donation' => null
+    $name = $_POST['name'];
+    $surname = $_POST['surname'];
+    $birthDate = $_POST['birth_date'];
+    $bloodType = $_POST['blood_type'];
+    $rhFactor = $_POST['rh_factor'];
+
+    $newDonor = [
+        'name' => $name,
+        'surname' => $surname,
+        'birth_date' => $birthDate,
+        'blood_type' => $bloodType,
+        'rh_factor' => $rhFactor,
+        'last_donation_date' => null // أو يمكنك إضافة قيمة افتراضية
     ];
-    $donors[] = $donor;
-    $_SESSION['donors'] = $donors; // تحديث الجلسة
-    $message = "تم إضافة المتبرع بنجاح.";
+
+    $_SESSION['donors'][] = $newDonor;
+
+    // حفظ البيانات في ملف
+    file_put_contents('donors.txt', json_encode($_SESSION['donors']));
+
+    // إعادة التوجيه لتجنب إعادة إرسال البيانات
+    header("Location: admin.php");
+    exit();
 }
 ?>
 <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>صفحة الأدمن</title>
+    <title>صفحة الإدارة</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            direction: rtl; 
-            background-color: #f2f2f2; 
-        }
+        body { font-family: Arial, sans-serif; direction: rtl; background-color: #f2f2f2; }
         h1 { color: #4CAF50; }
         a { text-decoration: none; color: #fff; background-color: #4CAF50; padding: 10px; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     </style>
 </head>
 <body>
-    <h1>مرحبًا بك، <?php echo $_SESSION['username']; ?> (الأدمن)</h1>
+    <h1>مرحبًا بك، <?php echo $_SESSION['username']; ?> (الإداري)</h1>
     <p><a href="logout.php">تسجيل الخروج</a></p>
-    
-    <h2>إضافة متبرع جديد</h2>
+
+    <h2>إضافة متبرع</h2>
     <form method="POST">
         <input type="text" name="name" placeholder="الاسم" required>
         <input type="text" name="surname" placeholder="اللقب" required>
@@ -55,36 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_donor'])) {
             <option value="O">O</option>
         </select>
         <select name="rh_factor" required>
-            <option value="">اختر زومة الريزوس</option>
+            <option value="">اختر زمرة الريزوس</option>
             <option value="+">موجب</option>
             <option value="-">سالب</option>
         </select>
-        <input type="submit" name="add_donor" value="إضافة المتبرع">
+        <input type="submit" name="add_donor" value="إضافة">
     </form>
-    <?php if (isset($message)) echo "<p>$message</p>"; ?>
-
-    <h2>قائمة المتبرعين</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>الاسم</th>
-                <th>اللقب</th>
-                <th>تاريخ الميلاد</th>
-                <th>الزمرة الدموية</th>
-                <th>زمرة الريزوس</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($donors as $donor): ?>
-                <tr>
-                    <td><?php echo $donor['name']; ?></td>
-                    <td><?php echo $donor['surname']; ?></td>
-                    <td><?php echo $donor['birth_date']; ?></td>
-                    <td><?php echo $donor['blood_type']; ?></td>
-                    <td><?php echo $donor['rh_factor']; ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
 </body>
 </html>
