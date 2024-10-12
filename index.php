@@ -40,35 +40,71 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
         }
         .button:hover {
             background-color: #0056b3;
+        }
+        /* تنسيق إضافي للنموذج لجعله أصغر */
+        form {
+            display: inline-block;
+            text-align: left;
+            width: 100%;
+        }
+        form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        form input[type="text"],
+        form input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        form input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form input[type="submit"]:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>مرحبا بك في صفحة الدخول</h1>
+    <h1>صفحة الدخول</h1>
     <form action="login.php" method="POST">
-        <label for="username">اسم المستخدم:</label><br>
-        <input type="text" id="username" name="username" required><br><br>
-        <label for="password">كلمة المرور:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
+        <label for="username">اسم المستخدم:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">كلمة المرور:</label>
+        <input type="password" id="password" name="password" required>
+
         <input type="submit" value="دخول">
     </form>
 
     <div class="hospital-info">
-        <p>معلومات المستشفى:</p>
-        <p>اسم المستشفى: [اسم المستشفى]</p>
-        <p>العنوان: [عنوان المستشفى]</p>
-        <p>الهاتف: [رقم هاتف المستشفى]</p>
+        <p><strong>معلومات المستشفى:</strong></p>
+        <p>اسم المستشفى: <span>مستشفى عين الكبيرة</span></p>
+        <p>العنوان: <span>عين الكبيرة</span></p>
+        <p>الهاتف: <span>+213 36 89 63 13</span></p>
     </div>
 
     <a href="visitors.php" class="button">ابحث عن المتبرعين</a>
 
     <div class="footer">
-        <p>&copy; 2024 جميع الحقوق محفوظة لأطباء مستشفى عين الكبيرة.</p>
+        <p>&copy; 2024 جميع الحقوق محفوظة.</p>
     </div>
 </div>
 
