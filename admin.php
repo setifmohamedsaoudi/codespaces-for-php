@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// تحميل بيانات المتبرعين من ملف
+// تأكد من أن الجلسة تحتوي على قائمة المتبرعين
 if (!isset($_SESSION['donors'])) {
     if (file_exists('donors.txt')) {
         $donorsData = file_get_contents('donors.txt');
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_donor'])) {
         'birth_date' => $birthDate,
         'blood_type' => $bloodType,
         'rh_factor' => $rhFactor,
-        'last_donation_date' => null // أو يمكنك إضافة قيمة افتراضية
+        'last_donation_date' => null
     ];
 
     $_SESSION['donors'][] = $newDonor;
@@ -73,5 +73,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_donor'])) {
         </select>
         <input type="submit" name="add_donor" value="إضافة">
     </form>
+
+    <h2>قائمة المتبرعين</h2>
+    <?php if (empty($_SESSION['donors'])): ?>
+        <p>لا توجد متبرعين مسجلين بعد.</p>
+    <?php else: ?>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>اللقب</th>
+                    <th>تاريخ الميلاد</th>
+                    <th>الزمرة الدموية</th>
+                    <th>زمرة الريزوس</th>
+                    <th>تاريخ آخر تبرع</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($_SESSION['donors'] as $donor): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($donor['name']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['surname']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['birth_date']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['rh_factor']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['last_donation_date'] ?? 'غير محدد'); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 </body>
 </html>
