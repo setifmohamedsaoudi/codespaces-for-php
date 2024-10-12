@@ -1,73 +1,24 @@
 <?php
-// nurse.php
 session_start();
-
-// التحقق من تسجيل الدخول وصلاحية الدور
+// التحقق مما إذا كان المستخدم قد سجل الدخول كممرض
 if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'nurse') {
-    header("Location: login.php");
+    header("Location: login.php?role=nurse");
     exit();
 }
 
-// مسارات ملفات JSON
-$donorsFile = 'donors.json';
+// إعداد مصفوفة للمتبرعين (بدون قاعدة بيانات)
+$donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
 
-// وظيفة لتحميل البيانات من ملف JSON
-function loadData($file) {
-    if (!file_exists($file)) {
-        file_put_contents($file, json_encode([]));
-    }
-    $json = file_get_contents($file);
-    return json_decode($json, true);
-}
+// البحث عن متبرع
+$searchResult = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
+    $searchName = $_POST['name'];
+    $searchSurname = $_POST['surname'];
 
-// وظيفة لحفظ البيانات في ملف JSON
-function saveData($file, $data) {
-    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    file_put_contents($file, $json);
-}
-
-$search_results = [];
-$update_message = "";
-
-// معالجة النموذج
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['search'])) {
-        $first_name = trim($_POST['first_name']);
-        $last_name = trim($_POST['last_name']);
-        
-        if ($first_name && $last_name) {
-            $donors = loadData($donorsFile);
-            foreach ($donors as $donor) {
-                if (strcasecmp($donor['first_name'], $first_name) == 0 && strcasecmp($donor['last_name'], $last_name) == 0) {
-                    $search_results[] = $donor;
-                }
-            }
-            if (count($search_results) == 0) {
-                $update_message = "لم يتم العثور على المتبرع.";
-            }
-        } else {
-            $update_message = "يرجى إدخال الاسم واللقب.";
-        }
-    }
-    
-    if (isset($_POST['update'])) {
-        $donor_id = $_POST['donor_id'];
-        $last_donation_date = $_POST['last_donation_date'];
-        
-        if ($donor_id && $last_donation_date) {
-            $donors = loadData($donorsFile);
-            foreach ($donors as &$donor) {
-                if ($donor['id'] == $donor_id) {
-                    $donor['last_donation_date'] = $last_donation_date;
-                    break;
-                }
-            }
-            saveData($donorsFile, $donors);
-            $update_message = "تم تحديث تاريخ آخر تبرع بنجاح!";
-            // إعادة البحث بعد التحديث
-            $search_results = [];
-        } else {
-            $update_message = "يرجى إدخال تاريخ آخر تبرع.";
+    foreach ($donors as $donor) {
+        if ($donor['name'] === $searchName && $donor['surname'] === $searchSurname) {
+            $searchResult = $donor;
+            break;
         }
     }
 }
@@ -76,149 +27,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>قسم الممرض</title>
+    <title>صفحة الممرض</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
             direction: rtl; 
             background-color: #f2f2f2; 
-            margin: 0; 
-            padding: 0;
         }
-        .container { 
-            width: 80%; 
-            margin: 20px auto; 
-            padding: 20px; 
-            background-color: #fff; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
-        }
-        .logout {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-        h2 { text-align: center; }
-        .message { 
-            padding: 10px; 
-            margin-bottom: 20px; 
-            border-radius: 5px;
-        }
-        .success { 
-            background-color: #d4edda; 
-            color: #155724; 
-        }
-        .error { 
-            background-color: #f8d7da; 
-            color: #721c24; 
-        }
-        form { 
-            border: 1px solid #ccc; 
-            padding: 20px; 
-            border-radius: 5px; 
-            margin-bottom: 20px;
-        }
-        label { 
-            display: block; 
-            margin-top: 10px; 
-        }
-        input, select { 
-            width: 100%; 
-            padding: 8px; 
-            margin-top: 5px; 
-            box-sizing: border-box;
-        }
-        input[type="submit"] { 
-            width: auto; 
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-top: 15px;
-        }
-        input[type="submit"]:hover { 
-            background-color: #45a049; 
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 20px;
-        }
-        th, td { 
-            border: 1px solid #ddd; 
-            padding: 8px; 
-            text-align: center; 
-        }
-        th { 
-            background-color: #f2f2f2; 
-        }
-        @media (max-width: 768px) {
-            .container {
-                width: 95%;
-            }
-        }
+        h1 { color: #4CAF50; }
+        a { text-decoration: none; color: #fff; background-color: #4CAF50; padding: 10px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logout">
-            <p>مرحبًا، <?php echo htmlspecialchars($_SESSION['username']); ?>! <a href="logout.php">تسجيل الخروج</a></p>
-        </div>
-        
-        <h2>قسم الممرض</h2>
-        
-        <?php if ($update_message): ?>
-            <div class="message <?php echo strpos($update_message, 'نجاح') !== false ? 'success' : 'error'; ?>">
-                <?php echo $update_message; ?>
-            </div>
-        <?php endif; ?>
-        
-        <!-- نموذج البحث -->
-        <form action="nurse.php" method="post">
-            <input type="hidden" name="search" value="1">
-            
-            <label for="first_name">الاسم:</label>
-            <input type="text" id="first_name" name="first_name" required>
-            
-            <label for="last_name">اللقب:</label>
-            <input type="text" id="last_name" name="last_name" required>
-            
-            <input type="submit" value="بحث">
-        </form>
-        
-        <?php if (count($search_results) > 0): ?>
-            <h3>نتائج البحث</h3>
-            <table>
+    <h1>مرحبًا بك، <?php echo $_SESSION['username']; ?> (الممرض)</h1>
+    <p><a href="logout.php">تسجيل الخروج</a></p>
+
+    <h2>بحث عن متبرع</h2>
+    <form method="POST">
+        <input type="text" name="name" placeholder="الاسم" required>
+        <input type="text" name="surname" placeholder="اللقب" required>
+        <input type="submit" name="search_donor" value="بحث">
+    </form>
+
+    <?php if ($searchResult): ?>
+        <h3>نتائج البحث:</h3>
+        <table>
+            <thead>
                 <tr>
                     <th>الاسم</th>
                     <th>اللقب</th>
                     <th>تاريخ الميلاد</th>
-                    <th>الزَّمَة الدموية</th>
-                    <th>زومة الريزوس</th>
-                    <th>تاريخ آخر تبرع</th>
-                    <th>تحديث آخر تبرع</th>
+                    <th>الزمرة الدموية</th>
+                    <th>زمرة الريزوس</th>
                 </tr>
-                <?php foreach ($search_results as $donor): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($donor['first_name']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['last_name']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['date_of_birth']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
-                        <td><?php echo htmlspecialchars($donor['rh_factor']); ?></td>
-                        <td><?php echo $donor['last_donation_date'] ? htmlspecialchars($donor['last_donation_date']) : 'لم يتبرع بعد'; ?></td>
-                        <td>
-                            <form action="nurse.php" method="post">
-                                <input type="hidden" name="update" value="1">
-                                <input type="hidden" name="donor_id" value="<?php echo htmlspecialchars($donor['id']); ?>">
-                                <input type="date" name="last_donation_date" required>
-                                <input type="submit" value="تحديث">
-                            </form>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </table>
-        <?php endif; ?>
-    </div>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><?php echo $searchResult['name']; ?></td>
+                    <td><?php echo $searchResult['surname']; ?></td>
+                    <td><?php echo $searchResult['birth_date']; ?></td>
+                    <td><?php echo $searchResult['blood_type']; ?></td>
+                    <td><?php echo $searchResult['rh_factor']; ?></td>
+                </tr>
+            </tbody>
+        </table>
+    <?php elseif ($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+        <p>لا توجد نتائج للبحث.</p>
+    <?php endif; ?>
 </body>
 </html>
