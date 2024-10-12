@@ -65,21 +65,89 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>إدارة المتبرعين بالدم</title>
     <style>
-        body { font-family: Arial, sans-serif; direction: rtl; }
-        .container { width: 60%; margin: auto; }
-        .message { padding: 10px; margin-bottom: 20px; }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        form { border: 1px solid #ccc; padding: 20px; border-radius: 5px; }
-        label { display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; }
-        input[type="submit"] { width: auto; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-        input[type="submit"]:hover { background-color: #45a049; }
-        .requests { margin-top: 40px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-        .logout { text-align: right; margin-bottom: 20px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            direction: rtl; 
+            background-color: #f2f2f2; 
+            margin: 0; 
+            padding: 0;
+        }
+        .container { 
+            width: 80%; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background-color: #fff; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        .logout {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        h2 { text-align: center; }
+        .message { 
+            padding: 10px; 
+            margin-bottom: 20px; 
+            border-radius: 5px;
+        }
+        .success { 
+            background-color: #d4edda; 
+            color: #155724; 
+        }
+        .error { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+        }
+        form { 
+            border: 1px solid #ccc; 
+            padding: 20px; 
+            border-radius: 5px; 
+            margin-bottom: 40px;
+        }
+        label { 
+            display: block; 
+            margin-top: 10px; 
+        }
+        input, select { 
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 5px; 
+            box-sizing: border-box;
+        }
+        input[type="submit"] { 
+            width: auto; 
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        input[type="submit"]:hover { 
+            background-color: #45a049; 
+        }
+        .requests { 
+            margin-top: 40px; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 8px; 
+            text-align: center; 
+        }
+        th { 
+            background-color: #f2f2f2; 
+        }
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -126,7 +194,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <option value="Negative">سالب</option>
             </select>
             
-            <br>
             <input type="submit" value="إرسال">
         </form>
         
@@ -157,11 +224,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         }
                     ?>
                     <tr>
-                        <td><?php echo $donor ? $donor['first_name'] . ' ' . $donor['last_name'] : 'غير معروف'; ?></td>
+                        <td><?php echo $donor ? htmlspecialchars($donor['first_name'] . ' ' . $donor['last_name']) : 'غير معروف'; ?></td>
                         <td><?php echo htmlspecialchars($request['visitor_name']); ?></td>
                         <td><?php echo htmlspecialchars($request['visitor_contact']); ?></td>
-                        <td><?php echo $request['request_date']; ?></td>
-                        <td><?php echo $request['status']; ?></td>
+                        <td><?php echo htmlspecialchars($request['request_date']); ?></td>
+                        <td><?php echo htmlspecialchars($request['status']); ?></td>
                     </tr>
                 <?php endforeach; ?>
             </table>
