@@ -13,13 +13,14 @@ if (file_exists('donors.txt')) {
 }
 
 $searchResults = [];
+$updateSuccess = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
-    $name = $_POST['name'];
-    $surname = $_POST['surname'];
+    $name = trim($_POST['name']);
+    $surname = trim($_POST['surname']);
 
     // البحث عن المتبرع بالاسم واللقب
-    foreach ($donors as $donor) {
+    foreach ($donors as &$donor) {
         if (strcasecmp($donor['name'], $name) === 0 && strcasecmp($donor['surname'], $surname) === 0) {
             $searchResults[] = $donor;
             break; // بمجرد العثور على المتبرع، نخرج من الحلقة
@@ -34,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
 
         // تحديث البيانات في ملف المتبرعين
         file_put_contents('donors.txt', json_encode($donors));
+        $updateSuccess = true; // تأكيد التحديث
     }
 }
 ?>
@@ -61,6 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
         <input type="date" name="last_donation_date" placeholder="تاريخ آخر تبرع" required>
         <input type="submit" name="search_donor" value="بحث وتحديث">
     </form>
+
+    <?php if ($updateSuccess): ?>
+        <p style="color: green;">تم تحديث تاريخ آخر تبرع بنجاح!</p>
+    <?php endif; ?>
 
     <?php if (!empty($searchResults)): ?>
         <h3>نتائج البحث:</h3>
