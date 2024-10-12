@@ -5,34 +5,35 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'nurse') {
     exit();
 }
 
-$donors = isset($_SESSION['donors']) ? $_SESSION['donors'] : [];
-$searchResult = null;
-$updateSuccess = false;
+// تحميل بيانات المتبرعين من ملف
+$donors = [];
+if (file_exists('donors.txt')) {
+    $donorsData = file_get_contents('donors.txt');
+    $donors = json_decode($donorsData, true) ?? [];
+}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['search_donor'])) {
-        // البحث عن متبرع
-        $searchName = $_POST['name'];
-        $searchSurname = $_POST['surname'];
+$searchResults = [];
 
-        foreach ($donors as $donor) {
-            if ($donor['name'] === $searchName && $donor['surname'] === $searchSurname) {
-                $searchResult = $donor;
-                break;
-            }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_donor'])) {
+    $name = $_POST['name'];
+    $surname = $_POST['surname'];
+
+    // البحث عن المتبرع بالاسم واللقب
+    foreach ($donors as $donor) {
+        if (strcasecmp($donor['name'], $name) === 0 && strcasecmp($donor['surname'], $surname) === 0) {
+            $searchResults[] = $donor;
+            break; // بمجرد العثور على المتبرع، نخرج من الحلقة
         }
-    } elseif (isset($_POST['update_donation_date'])) {
-        // تحديث تاريخ آخر تبرع
-        $donationDate = $_POST['donation_date'];
-        foreach ($donors as &$donor) {
-            if ($donor['name'] === $_POST['name'] && $donor['surname'] === $_POST['surname']) {
-                $donor['last_donation_date'] = $donationDate;
-                $updateSuccess = true;
-                break;
-            }
-        }
-        $_SESSION['donors'] = $donors; // تحديث الجلسة
-        file_put_contents('donors.txt', json_encode($_SESSION['donors'])); // حفظ البيانات في الملف
+    }
+
+    // تحديث تاريخ آخر تبرع إذا تم العثور على المتبرع
+    if (!empty($searchResults) && isset($_POST['last_donation_date'])) {
+        $lastDonationDate = $_POST['last_donation_date'];
+        $donorToUpdate = &$donors[array_search($searchResults[0], $donors)];
+        $donorToUpdate['last_donation_date'] = $lastDonationDate;
+
+        // تحديث البيانات في ملف المتبرعين
+        file_put_contents('donors.txt', json_encode($donors));
     }
 }
 ?>
@@ -42,11 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>صفحة الممرض</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            direction: rtl; 
-            background-color: #f2f2f2; 
-        }
+        body { font-family: Arial, sans-serif; direction: rtl; background-color: #f2f2f2; }
         h1 { color: #4CAF50; }
         a { text-decoration: none; color: #fff; background-color: #4CAF50; padding: 10px; border-radius: 5px; }
         table { width: 100%; border-collapse: collapse; }
@@ -61,10 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST">
         <input type="text" name="name" placeholder="الاسم" required>
         <input type="text" name="surname" placeholder="اللقب" required>
-        <input type="submit" name="search_donor" value="بحث">
+        <input type="date" name="last_donation_date" placeholder="تاريخ آخر تبرع" required>
+        <input type="submit" name="search_donor" value="بحث وتحديث">
     </form>
 
-    <?php if ($searchResult): ?>
+    <?php if (!empty($searchResults)): ?>
         <h3>نتائج البحث:</h3>
         <table>
             <thead>
@@ -78,19 +76,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><?php echo htmlspecialchars($searchResult['name']); ?></td>
-                    <td><?php echo htmlspecialchars($searchResult['surname']); ?></td>
-                    <td><?php echo htmlspecialchars($searchResult['birth_date']); ?></td>
-                    <td><?php echo htmlspecialchars($searchResult['blood_type']); ?></td>
-                    <td><?php echo htmlspecialchars($searchResult['rh_factor']); ?></td>
-                    <td><?php echo htmlspecialchars($searchResult['last_donation_date'] ?? 'غير محدد'); ?></td>
-                </tr>
+                <?php foreach ($searchResults as $donor): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($donor['name']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['surname']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['birth_date']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['blood_type']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['rh_factor']); ?></td>
+                        <td><?php echo htmlspecialchars($donor['last_donation_date'] ?? 'غير محدد'); ?></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
-        
-        <h3>تحديث تاريخ آخر تبرع</h3>
-        <form method="POST">
-            <input type="hidden" name="name" value="<?php echo htmlspecialchars($searchResult['name']); ?>">
-            <input type="hidden" name="surname" value="<?php echo htmlspecialchars($searchResult['surname']); ?>">
-            <label for="donation_date">تاريخ
+    <?php else: ?>
+        <p>لا توجد نتائج للبحث.</p>
+    <?php endif; ?>
+</body>
+</html>
